@@ -1,0 +1,31 @@
+{
+  "name": "interviewprep",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
+    "db:reset": "rm -f dev.db && npx knex migrate:latest --knexfile knexfile.js --esm && npx knex seed:run --knexfile knexfile.js --esm",
+    "db:migrate": "npx knex migrate:latest --knexfile knexfile.js --esm",
+    "db:seed": "npx knex seed:run --knexfile knexfile.js --esm"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.873.0",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "knex": "^3.1.0",
+    "nodemon": "^3.1.10",
+    "ollama": "^0.5.17",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1"
+  }
+}
