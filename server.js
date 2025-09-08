@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
+import morgan from "morgan"; 
 import db from "./db.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
@@ -9,16 +10,16 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const BASE_URL = process.env.BASE_URL;
 
 app.use(cors());
 app.use(bodyParser.json());
-
+app.use(morgan("dev")); 
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-
-app.get("/ai/interview/question", async (req, res) => {
+app.get(`${BASE_URL}/question`, async (req, res) => {
   try {
     const role = req.query.role || "backend developer";
     const level = req.query.difficulty || "medium";
@@ -48,13 +49,12 @@ Return only the question, nothing else.
 
     res.json({ question: questionText, qns_id: questionResponse[0].id });
   } catch (err) {
-    console.error(err);
+    console.error("Error generating question:", err);
     res.status(500).json({ error: "Failed to generate question" });
   }
 });
 
-
-app.post("/ai/interview/feedback", async (req, res) => {
+app.post(`${BASE_URL}/feedback`, async (req, res) => {
   try {
     const { answer, role = "backend developer", question, qns_id } = req.body;
 
@@ -85,10 +85,7 @@ Rules:
 
     let cleaned = feedbackText.trim();
     cleaned = cleaned.replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
-
-
     cleaned = cleaned.replace(/,\s*}/g, "}").replace(/,\s*]/g, "]");
-    
 
     let jsonParsedResponse;
     try {
@@ -107,13 +104,12 @@ Rules:
 
     res.json({ feedback: jsonParsedResponse });
   } catch (err) {
-    console.error(err);
+    console.error(" Error in feedback route:", err);
     res.status(500).json({ error: "Failed to evaluate answer" });
   }
 });
 
-
-app.post("/ai/interview/history", async (req, res) => {
+app.post(`${BASE_URL}/history`, async (req, res) => {
   try {
     const getHistory = await db.raw(`
       SELECT a.question_id, q.question, a.actual_answer, *
@@ -121,13 +117,13 @@ app.post("/ai/interview/history", async (req, res) => {
       LEFT JOIN questions q ON a.question_id = q.id
     `);
 
-    res.json({ history: getHistory });
+    res.json({ history: getHistory.rowCount ? getHistory.rows : getHistory });
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching history:", err);
     res.status(500).json({ error: "Failed to get answer history" });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 AI Interview Coach running on http://localhost:${PORT}`);
+  console.log(`AI Interview Coach running on http://localhost:${PORT}`);
 });
