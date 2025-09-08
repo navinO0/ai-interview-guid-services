@@ -16,6 +16,7 @@
   "description": "",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.873.0",
+    "@google/generative-ai": "^0.24.1",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
